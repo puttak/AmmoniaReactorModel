@@ -1,0 +1,12 @@
+#stream class and methods
+source("PropFugacity.R")
+source("PropHeatCapacity.R")
+source("PropConstants.R")
+source("stream.R")
+source("StreamMethods.R")
+source("intrinsicReaction.R")
+source("reactionProperties.R")
+source("CatalystBed.R")
+source("CatalystBedMethods.R")
+source("EffectivenessFactor.R")
+source("orthogonalcollocation.R")
