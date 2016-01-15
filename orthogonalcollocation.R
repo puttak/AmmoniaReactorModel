@@ -22,8 +22,11 @@ ocfunction <- function( xH2, xN2, xNH3,
     term2 <- -2 * (gamma_i + c(xMatr)) * dydx ^2
     #3rd term in equation
     term3 <- 2 * (1 / w_1) * dydx
+    #effective diffusivity
+    ediff <- 
     #4th term
-    
+    term4 <- rParticle^2 / C_total *
+                
     
 }
 debug(ocfunction)
