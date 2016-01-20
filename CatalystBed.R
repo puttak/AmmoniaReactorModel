@@ -1,4 +1,4 @@
- setClass(
+setClass(
     Class = "Bed",
     representation = representation(
         inlet = "Stream",
