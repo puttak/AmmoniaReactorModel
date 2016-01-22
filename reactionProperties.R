@@ -41,13 +41,13 @@ pr.reaction.rate.NH3 <- function(kin.const, eq.const, fugacity, alpha){
     return(rate)
 }
 
-pure.RNH3 <- function(molefractions, fugacitycf, kin.const, eq.const, t, p, alpha){
-    rate <- kin.const *
-        (   eq.const^2 * (fugacitycf[["nitrogen"]]*molefractions[["nitrogen"]]*p)*
-                ((fugacitycf[["hydrogen"]]*molefractions[["hydrogen"]]*p)^3 / 
-                     (fugacitycf[["ammonia"]]*molefractions[["ammonia"]]*p) ^ 2) ^ alpha -
-                ((fugacitycf[["ammonia"]]*molefractions[["ammonia"]]*p) ^ 2/
-                     (fugacitycf[["hydrogen"]]*molefractions[["hydrogen"]]*p) ^ 3) ^ (1 - alpha)
-        )
-    return(rate)
-}
+# pure.RNH3 <- function(molefractions, fugacitycf, kin.const, eq.const, t, p, alpha){
+#     rate <- kin.const *
+#         (   eq.const^2 * (fugacitycf[["nitrogen"]]*molefractions[["nitrogen"]]*p)*
+#                 ((fugacitycf[["hydrogen"]]*molefractions[["hydrogen"]]*p)^3 / 
+#                      (fugacitycf[["ammonia"]]*molefractions[["ammonia"]]*p) ^ 2) ^ alpha -
+#                 ((fugacitycf[["ammonia"]]*molefractions[["ammonia"]]*p) ^ 2/
+#                      (fugacitycf[["hydrogen"]]*molefractions[["hydrogen"]]*p) ^ 3) ^ (1 - alpha)
+#         )
+#     return(rate)
+# }

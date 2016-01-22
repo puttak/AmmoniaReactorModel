@@ -22,7 +22,7 @@ pr.effectiveness.factor <- function(surface, init.guess,
     colnames(Xi) <- c("hydrogen", "nitrogen","ammonia")
     #fugacities
     fgc.cf <- sapply(fugacity.list[c("hydrogen", "nitrogen","ammonia")],
-                     function(x) do.call(x, args = list(t=t, p=p))
+                     function(x) do.call(x, args = list(t=t+T_abs, p=p))
     )
     fgc <- Xi%*%diag(fgc.cf)*p
     colnames(fgc) <- c("hydrogen", "nitrogen","ammonia")
@@ -32,33 +32,13 @@ pr.effectiveness.factor <- function(surface, init.guess,
     return(3*(sum(int_weights*rates))/rates[length(rates)])
 }
 
-effectiveness.factor <- function(stream, reaction, catalyst){return(1)}
-
-
-
-catalystParams <- c("intrPorosity", "porosity", "pelletD")
-setClass("Catalyst",
-         representation = representation(
-             geometry = "numeric"
-         ),
-         validity = function(object){
-             if ( !element.match(names(object@geometry), catalystParams) )
-                 stop("Wrong names in geometry")
-             if ( any(object@geometry < 0))
-                 stop("Negative parameters of catalyst geometry")
-             if (object@geometry[["intrPorosity"]] > 1)
-                 stop("IntrPorosity is greater than 0")
-             if (object@geometry[["porosity"]] > 1)
-                 stop("porosity is greater than 0")
-             return(TRUE)
-         }
-)
-
-setMethod("initialize",
-          "Catalyst",
-          definition = function(.Object, geometry){
-                .Object@geometry = geometry
-                validObject(.Object)
-                return(.Object)
-          }
-)
+effectiveness.factor <- function(stream, reaction, catalyst, init.guess = rep(0.1, times = 9)){
+    pr.effectiveness.factor(fraction(stream)[c("hydrogen","nitrogen","ammonia")], init.guess,
+                            stream@conditions["temperature"], stream@conditions["pressure"], 
+                            total.concentration(stream),
+                            reaction@properties[["preExp"]], reaction@properties["activationEnergy"],
+                            reaction@properties[["alpha"]],
+                            catalyst@geometry[["intrPorosity"]],catalyst@geometry[["porosity"]],
+                            catalyst@geometry[["pelletD"]]/2
+                            )
+}
