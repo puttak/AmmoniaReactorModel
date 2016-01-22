@@ -18,7 +18,7 @@ setClass(
         return(TRUE)
     }
 )
-
+#Stream constructor
 setMethod("initialize",
           "Stream",
           definition = function(.Object, t, p, flowrate, composition){

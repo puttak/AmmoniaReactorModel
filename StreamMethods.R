@@ -203,7 +203,8 @@ setMethod(
 
 pr.std.diffusivity <- function(element = c(c("hydrogen", "nitrogen", "ammonia")),
                                xH2, xN2, xNH3){
-    
+    result <- sapply(element, function(x) std.diff[[x]](xH2, xN2, xNH3) )
+    return(result)
 }
     
 
@@ -214,5 +215,6 @@ pr.diffusivity <- function(std.diff, t, p){
     return(result)
 }
 pr.effective.diffusivity <- function(diff, theta){
-    eff.diff <- diffusivity(object, element)*phi/2
+    result <- sapply(diff, function(x) theta*x/2)
+    return(result)
 }

@@ -1,13 +1,5 @@
 reaction_propertynames <- c("preExp", "activationEnergy", "alpha")
 
-element.match <- function(here, there){
-    if (length(here)==length(there))
-        result <- all(sapply(there, function(x) any(here == x)))
-    else
-        stop("Vectors' length does not equal!")
-    return(result)
-}
-
 setClass(
     Class = "reaction",
     representation = representation(
