@@ -10,7 +10,7 @@ setClass("Catalyst",
              if ( any(object@geometry < 0))
                  stop("Negative parameters of catalyst geometry")
              if (object@geometry[["intrPorosity"]] > 1)
-                 stop("IntrPorosity is greater than 0")
+                 stop("IntrPorosity is greater than 1")
              if (object@geometry[["porosity"]] > 1)
                  stop("porosity is greater than 0")
              return(TRUE)

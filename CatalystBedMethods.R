@@ -4,7 +4,7 @@ fractional.conversion.nitrogen <- function(mole0N2, moletotal, hi){
     if (mole0N2 <0 || moletotal <0 || hi < 0)
         stop("One or more parameters are negative")
     if (mole0N2 > moletotal)
-        stop("Element mole is latger than total")
+        stop("Element mole is larger than total")
     return( mole0N2*(1 - hi)/(moletotal - 2*mole0N2*hi))
 }
 
@@ -12,7 +12,7 @@ fractional.conversion.hydrogen <- function(mole0N2, mole0H2, moletotal, hi){
     if (mole0N2 < 0 || mole0H2 < 0 || moletotal <0 || hi < 0)
         stop("One or more parameters are negative")
     if (mole0N2 > moletotal)
-        stop("Element mole is latger than total")
+        stop("Element mole is larger than total")
     return( (mole0H2 - 3*mole0N2*hi)/(moletotal - 2*mole0N2*hi) )
 }
 
@@ -20,7 +20,7 @@ fractional.conversion.ammonia <- function(mole0N2, mole0H2, moletotal, hi){
     if (mole0N2 < 0 || mole0H2 < 0 || moletotal <0 || hi < 0)
         stop("One or more parameters are negative")
     if (mole0N2 > moletotal)
-        stop("Element mole is latger than total")
+        stop("Element mole is larger than total")
     return( 2*mole0H2*hi/(moletotal - 2*mole0N2*hi) )
 }
 
@@ -45,8 +45,7 @@ setMethod("fractional.conversion",
 setMethod("fractional.conversion",
           "Stream",
           definition = function(object, hi){
-              totalmole <- flow.rate(object, type = "mole") 
-              moles <-  totalmole*fraction(object)
+              moles <-  flow.rate(object, type = "mole")*fraction(object)
 #               moles <- list(moletotal = totalmole, mol0N2 = moles[["nitrogen"]],
 #                             mole0H2 = moles[["hydrogen"]])
               arguments <- list(nitrogen = list(object = "nitrogen", mole0N2 =  moles[["nitrogen"]], 
@@ -85,7 +84,8 @@ setGeneric("recalculate.stream",
 )
 setMethod("recalculate.stream",
           "Stream",
-          definition = function(object, hi){
+          definition = function(object, hi, return.stream = FALSE){
+              #prepares arguments to be passed for each of hi.mass functions
               arguments <-list( nitrogen = list(mass0N2 = flow.rate(object, type = "mass")*
                                                     fraction(object, element = "nitrogen",type = "mass"),
                                                  hi = hi),
@@ -100,9 +100,55 @@ setMethod("recalculate.stream",
                                                     fraction(object, element = "ammonia", type = "mole"),
                                                hi = hi)
                                 )
-              new_mass <- sapply(c("nitrogen", "hydrogen", "ammonia"),
+              #recalculates mass flows of N2, H2, NH3 for a given conversion hi
+              result <- sapply(c("nitrogen", "hydrogen", "ammonia"),
                                  function(x) do.call(hi.mass.list[[x]], args = arguments[[x]] )
                                  )
-              return(new_mass)
+              #add mass rates of methane and argon to the mass vector
+              if (return.stream){
+                  new_stream <- c(result, object@mdot[c("methane", "argon")])
+                  result <- object
+                  result@mdot <- new_stream
+                  result@conditions[["temperature"]] <- NA
+                  result@conditions[["pressure"]] <- NA
+              }
+              return(result)
           }
 )
+# returns bed as a function of its inlet
+bed.db <- function(bed){
+    volume <- bed@volume
+    reaction <- bed@reaction
+    catalyst <- bed@catalyst
+    stream <- bed@inlet
+    inlet_molar_fl_N2 <- flow.rate(bed@inlet,type = "mole")*fraction(bed@inlet, "nitrogen")
+    deb <- function(stream){
+        #effectiveness factor in stream
+        ef <- effectiveness.factor(stream, reaction, catalyst)
+        rate <- RNH3(stream, reaction)
+        mb <- ef * rate / (2 * 3.6 * inlet_molar_fl_N2)
+        eb <- - heat.of.reaction(stream) * ef * rate / (flow.rate(stream, type = "mole")* 3.6 *
+                                                            heat.capacity(stream, hc.un = "mole"))
+        result <- c(mb, eb)
+        #patch for now to fix names from ef function
+        names(result) <- NULL
+        names(result) <- c("mass", "heat")
+        return(result)
+    }
+}
+
+bed.ode.func <- function(bed.db){
+    inlet <- environment(bed.db)$stream
+    func <- function(t, y, parms = NULL){
+        stream <- recalculate.stream(inlet, y[[1]], return.stream = TRUE)
+        stream@conditions <- c(temperature=y[[2]], pressure=inlet@conditions[["pressure"]])
+        return(list(bed.db(stream)))
+    }
+}
+
+bed.calculate <- function(bed.ode.func, x0, method = "ode45", n.iter = 10){
+    require(deSolve)
+    vol <- environment(environment(bedode)$bed.db)$bed@volume
+    t_in <- environment(environment(bedode)$bed.db)$bed@inlet@conditions[["temperature"]]
+    ode(c(x0, t_in), seq(0, vol, length.out = n.iter), bed.ode.func, NULL, method = method)
+}
