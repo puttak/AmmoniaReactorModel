@@ -63,3 +63,6 @@ bed1 <- new("Bed", inlet1, reaction1, catalyst1, 4.75)
 bedode <- bed.ode.func(bed.db(bed1))
 #integrate bed ode
 bedresult <- bed.calculate(bedode, 0)
+
+bed.summary(bedresult, bed1)
+
