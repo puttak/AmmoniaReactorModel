@@ -148,7 +148,7 @@ bed.ode.func <- function(bed.db){
 
 bed.calculate <- function(bed.ode.func, x0, method = "ode45", n.iter = 10){
     require(deSolve)
-    vol <- environment(environment(bedode)$bed.db)$bed@volume
-    t_in <- environment(environment(bedode)$bed.db)$bed@inlet@conditions[["temperature"]]
+    vol <- environment(environment(bed.ode.func)$bed.db)$bed@volume
+    t_in <- environment(environment(bed.ode.func)$bed.db)$bed@inlet@conditions[["temperature"]]
     ode(c(x0, t_in), seq(0, vol, length.out = n.iter), bed.ode.func, NULL, method = method)
 }

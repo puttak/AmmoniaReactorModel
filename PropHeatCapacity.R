@@ -38,35 +38,7 @@ setMethod("heat.capacity",
               
           }
 )
-# heat.capacity <- function(element, t = 15, p = 1, hc.un = "mass", un = c("C", "atm")){
-#     #check t units and convert to C
-#     if (un[1] == "C")
-#         temperatureC <- t
-#     else if (un[1] == "K")
-#         temperatureC <- t - 273
-#     else 
-#         stop("Temperature units are not supported! Only C or K!")
-#     #check t values
-#     if (temperatureC <= -273)
-#         stop("Temperature below absolute zero!")
-#     #check p unit and convert to atm.
-#     if (un[2] == "atm")
-#         pressureAtm <- p
-#     else if (un[1 == "kPa"])
-#         pressureAtm <- p/101.325
-#     else
-#         stop("Pressure units are not supported! Only atm. or kPa!")
-#     if (pressureAtm <= 0)
-#         stop("Pressure below zero!")
-#     hc.to.call <- heat.capacity.list[[element]]
-#     #heat capacity in J/moleK
-#     hc <- hc.to.call(temperatureC, pressureAtm)
-#     #if specific heat is required
-#     if (hc.un == "mass")
-#         hc <- hc / molWeight[[element]] * 1000
-#     return(hc)
-#     
-# }
+
 
 #heat capacities at temperature, pressure
 #t = [C], p = [atm]

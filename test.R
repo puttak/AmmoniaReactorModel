@@ -66,3 +66,20 @@ bedresult <- bed.calculate(bedode, 0)
 
 bed.summary(bedresult, bed1)
 
+#bed2
+inlet2 <- recalculate.stream(inlet1, as.double(bedresult[nrow(bedresult),"1"]), TRUE)
+inlet2@conditions <-  c(temperature=433, pressure=226)
+bed2 <- new("Bed", inlet2, reaction1, catalyst1, 7.2)
+bedode2 <- bed.ode.func(bed.db(bed2))
+bedresult2 <- bed.calculate(bedode2, 0) 
+                            #as.double(bedresult[nrow(bedresult),"1"]))
+
+#bed 3
+inlet3 <- recalculate.stream(inlet2, as.double(bedresult2[nrow(bedresult2),"1"]), TRUE)
+inlet3@conditions <- c(temperature=415, pressure=226)
+bed3 <- new("Bed", inlet3, reaction1, catalyst1, 7.8)
+bedode3 <- bed.ode.func(bed.db(bed3))
+bedresult3 <- bed.calculate(bedode3, 0)
+                          #  as.double(bedresult2[nrow(bedresult2),"1"]))
+
+reactorresult<-rbind(bed.summary(bedresult, bed1), bed.summary(bedresult2, bed2), bed.summary(bedresult3, bed3))
