@@ -39,7 +39,7 @@ interchanger <- function(d.sh.inner, d.sh.outer, dt.inner, dt.outer, n.tube,
     l.tube <- l.tube
     n.tube <- n.tube
     lambda <- lambda
-    Acrosssec <- (d.sh.inner+d.sh.outer)/2*(pitch-dt.outer)/pitch*baff.spacing
+    Acrosssec <- pi*(d.sh.inner+d.sh.outer)/2*(pitch-dt.outer)/pitch*baff.spacing
     
    
     #globals visible for all functions
@@ -129,7 +129,7 @@ interchanger <- function(d.sh.inner, d.sh.outer, dt.inner, dt.outer, n.tube,
                         k.tube
         )
         #overall HT coefficient
-        k.overall <- 0.7*1/(1/(alpha.tube*dt.inner/2)+1/lambda*log(dt.outer/dt.inner)+1/(alpha.sh*dt.outer/2))
+        k.overall <- 1/(1/(alpha.tube*dt.inner/2)+1/lambda*log(dt.outer/dt.inner)+1/(alpha.sh*dt.outer/2))
         return(
             c(
               2*pi*n.tube*k.overall*(t.tube-t.sh)/(sum(mdot.tube)*hc.tube),
