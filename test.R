@@ -97,7 +97,7 @@ reactorresult<-rbind(bed.summary(bedresult, bed1), bed.summary(bedresult2, bed2)
 
 
 #test for CF's plant PFD
-inlet_total <- new("Stream", 266.3, 97.0, 893987, c(hydrogen=0.6499,
+inlet_total <- new("Stream", 270, 97.0, 752901, c(hydrogen=0.6499,
                                                    nitrogen=0.2401,
                                                    ammonia=0.0286,
                                                    methane=0.0675, 
@@ -105,9 +105,9 @@ inlet_total <- new("Stream", 266.3, 97.0, 893987, c(hydrogen=0.6499,
 inlet_bed1 <- inlet_total
 inlet_bed1@mdot <- inlet_bed1@mdot*(1-0.31395)
 quench_bed2 <- inlet_total
-quench_bed2@mdot <- quench_bed2@mdot*0.31395
+quench_bed2@mdot <- quench_bed2@mdot*0.34
 out_bed2 <- recalculate.stream(inlet_total, 0.25, TRUE)
-out_bed2@conditions[["temperature"]] <- 450
+out_bed2@conditions[["temperature"]] <- 445
 out_bed2@conditions[["pressure"]] <- inlet_total@conditions[["pressure"]]
 
 debug(interchanger)
