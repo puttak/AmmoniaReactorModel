@@ -218,3 +218,18 @@ pr.effective.diffusivity <- function(diff, theta){
     result <- sapply(diff, function(x) theta*x/2)
     return(result)
 }
+
+stream.mix <- function(stream1, stream2){
+    new_stream <- stream1
+    new_stream@mdot <- stream1@mdot+stream2@mdot
+    fr1 <- flow.rate(stream1)
+    fr2 <- flow.rate(stream2)
+    cp1 <- heat.capacity(stream1)
+    cp2 <- heat.capacity(stream2)
+    new_stream@conditions[["temperature"]] <- as.double((fr1*cp1*stream1@conditions[["temperature"]]+
+                                                        fr2*cp2*stream2@conditions[["temperature"]])/
+                                                        (fr1*cp1+fr2*cp2))
+    if (stream1@conditions[["pressure"]]!=stream2@conditions[["pressure"]])
+        warning("stream preassure are not equal. pressure of stream1 is taken")
+    return(new_stream)
+}
