@@ -138,10 +138,10 @@ bed.db <- function(bed){
 }
 
 bed.ode.func <- function(bed.db){
-    inlet <- environment(bed.db)$stream
+    #inlet <- environment(bed.db)$stream
     func <- function(t, y, parms = NULL){
-        stream <- recalculate.stream(inlet, y[[1]], return.stream = TRUE)
-        stream@conditions <- c(temperature=y[[2]], pressure=inlet@conditions[["pressure"]])
+        stream <- recalculate.stream(environment(bed.db)$stream, y[[1]], return.stream = TRUE)
+        stream@conditions <- c(temperature=y[[2]], pressure=environment(bed.db)$stream@conditions[["pressure"]])
         return(list(bed.db(stream)))
     }
 }

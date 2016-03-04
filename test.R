@@ -83,3 +83,35 @@ bedresult3 <- bed.calculate(bedode3, 0)
                           #  as.double(bedresult2[nrow(bedresult2),"1"]))
 
 reactorresult<-rbind(bed.summary(bedresult, bed1), bed.summary(bedresult2, bed2), bed.summary(bedresult3, bed3))
+#test for CF's plant PFD
+inlet_total <- new("Stream", 270, 97.0, 752901, c(hydrogen=0.6499,
+                                                  nitrogen=0.2401,
+                                                  ammonia=0.0286,
+                                                  methane=0.0675, 
+                                                  argon=0.0139))
+inlet_bed1 <- inlet_total
+inlet_bed1@mdot <- inlet_bed1@mdot*(1-0.31395)
+quench_bed2 <- inlet_total
+quench_bed2@mdot <- quench_bed2@mdot*0.34
+out_bed2 <- recalculate.stream(inlet_total, 0.25, TRUE)
+out_bed2@conditions[["temperature"]] <- 445
+out_bed2@conditions[["pressure"]] <- inlet_total@conditions[["pressure"]]
+
+debug(interchanger)
+amminch <- interchanger(d.sh.inner = 1.133, d.sh.outer = 1.692,
+                        dt.inner = 0.03175, dt.outer = 0.03175+2*0.00165, 
+                        n.tube = 740, l.tube = 8.16, baff.spacing = 0.664, pitch = 0.03969, lambda = 43)
+debug(amminch)
+amminch(out_bed2@mdot,
+        inlet_bed1@mdot,
+        out_bed2@conditions[["temperature"]], inlet_bed1@conditions[["temperature"]], 95)
+#test converter
+
+ammconverter <- converter(b1 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 4.75),
+                       b2 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 7.2),
+                       b3 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 7.8),
+                       interchanger(d.sh.inner = 1.133, d.sh.outer = 1.692,
+                                    dt.inner = 0.03175, dt.outer = 0.03175+2*0.00165, 
+                                    n.tube = 740, l.tube = 8.16, baff.spacing = 0.664, pitch = 0.03969, lambda = 43))
+debug(ammconverter)
+ammconverter(inlet_bed1, list(NULL, quench_bed2))
