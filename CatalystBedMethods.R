@@ -115,14 +115,17 @@ setMethod("recalculate.stream",
               return(result)
           }
 )
-# returns bed as a function of its inlet
+# returns bed as a function of its internals
 bed.db <- function(bed){
     volume <- bed@volume
     reaction <- bed@reaction
     catalyst <- bed@catalyst
-    stream <- bed@inlet
-    inlet_molar_fl_N2 <- flow.rate(bed@inlet,type = "mole")*fraction(bed@inlet, "nitrogen")
+    #stream <- bed@inlet
+    inlet_molar_fl_N2 <- NULL
     deb <- function(stream){
+        #if function has not been called yet, provide F0
+        # if (is.null(inlet_molar_fl_N2))
+        #     inlet_molar_fl_N2 <<- flow.rate(stream,type = "mole")*fraction(stream, "nitrogen")
         #effectiveness factor in stream
         ef <- effectiveness.factor(stream, reaction, catalyst)
         rate <- RNH3(stream, reaction)
@@ -136,19 +139,20 @@ bed.db <- function(bed){
         return(result)
     }
 }
-
-bed.ode.func <- function(bed.db){
-    #inlet <- environment(bed.db)$stream
+#diff balance of bed with respect to inlet
+bed.ode.func <- function(bed.db, inlet){
+    environment(bed.db)$inlet_molar_fl_N2 <- flow.rate(inlet,type = "mole")*fraction(inlet, "nitrogen")
+    inlet <- inlet
     func <- function(t, y, parms = NULL){
-        stream <- recalculate.stream(environment(bed.db)$stream, y[[1]], return.stream = TRUE)
-        stream@conditions <- c(temperature=y[[2]], pressure=environment(bed.db)$stream@conditions[["pressure"]])
+        stream <- recalculate.stream(inlet, y[[1]], return.stream = TRUE)
+        stream@conditions <- c(temperature=y[[2]], pressure=inlet@conditions[["pressure"]])
         return(list(bed.db(stream)))
     }
 }
 
-bed.calculate <- function(bed.ode.func, x0, method = "ode45", n.iter = 10){
+bed.calculate <- function(bed.ode.func, x0 = 0, method = "ode45", n.iter = 10){
     require(deSolve)
     vol <- environment(environment(bed.ode.func)$bed.db)$bed@volume
-    t_in <- environment(environment(bed.ode.func)$bed.db)$bed@inlet@conditions[["temperature"]]
+    t_in <- environment(bed.ode.func)$inlet@conditions[["temperature"]]
     ode(c(x0, t_in), seq(0, vol, length.out = n.iter), bed.ode.func, NULL, method = method)
 }

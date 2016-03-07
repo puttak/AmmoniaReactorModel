@@ -58,11 +58,11 @@ debug(pr.effectiveness.factor)
 effectiveness.factor(inlet1, reaction1, catalyst1)
 
 #bed
-bed1 <- new("Bed", inlet1, reaction1, catalyst1, 4.75)
+bed1 <- new("Bed", reaction1, catalyst1, 4.75)
 #bed ode function
-bedode <- bed.ode.func(bed.db(bed1))
+bedode <- bed.ode.func(bed.db(bed1), inlet1)
 #integrate bed ode
-bedresult <- bed.calculate(bedode, 0)
+bedresult <- bed.calculate(bedode)
 
 bed.summary(bedresult, bed1)
 
@@ -106,10 +106,10 @@ amminch(out_bed2@mdot,
         inlet_bed1@mdot,
         out_bed2@conditions[["temperature"]], inlet_bed1@conditions[["temperature"]], 95)
 #test converter
-
-ammconverter <- converter(b1 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 4.75),
-                       b2 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 7.2),
-                       b3 <- new("Bed", new("Stream",0, 0, 0, c(0,0,0,0,0)), reaction1, catalyst1, 7.8),
+debug(converter)
+ammconverter <- converter(b1 <- new("Bed", reaction1, catalyst1, 4.75),
+                       b2 <- new("Bed", reaction1, catalyst1, 7.2),
+                       b3 <- new("Bed", reaction1, catalyst1, 7.8),
                        interchanger(d.sh.inner = 1.133, d.sh.outer = 1.692,
                                     dt.inner = 0.03175, dt.outer = 0.03175+2*0.00165, 
                                     n.tube = 740, l.tube = 8.16, baff.spacing = 0.664, pitch = 0.03969, lambda = 43))
