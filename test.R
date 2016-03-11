@@ -4,7 +4,7 @@ conc <- c(hydrogen=0.6703,
           methane=0.0546, 
           argon=0.0256)
 inlet1 <- new("Stream", 385, 226, 242160, conc)
-reaction1 <- new("reaction", c(preExp = 10^14.7102, activationEnergy = 1.635e5, alpha = 0.55))
+reaction1 <- new("reaction", c(preExp = 10^6, activationEnergy = 120000, alpha = 0.55))
 catalyst1 <- new("Catalyst", c(intrPorosity=0.52, porosity=0.46, pelletD=0.0057))
 #inlet2 <- new("Stream", 385, 226, 242160, conc2)
 
@@ -45,7 +45,7 @@ pr.effectiveness.factor(c(hydrogen=0.6703,nitrogen=0.2219, ammonia=0.0276),
                           catalyst1@geometry[["pelletD"]]/2
                           )
 init.guess <- rep(0.1, times = 9)
-pr.effectiveness.factor(fraction(inlet1)[c(2,1,3)], init.guess,
+pr.effectiveness.factor(fraction(inlet1)[c(2,1,3)],
                         inlet1@conditions["temperature"], inlet1@conditions["pressure"], 
                         total.concentration(inlet1),
                         reaction1@properties[["preExp"]], reaction1@properties["activationEnergy"],
@@ -106,6 +106,18 @@ amminch(out_bed2@mdot,
         inlet_bed1@mdot,
         out_bed2@conditions[["temperature"]], inlet_bed1@conditions[["temperature"]], 95)
 #test converter
+inlet_total <- new("Stream", 285.4, 97.0, 752901, c(hydrogen=0.6499,
+                                                  nitrogen=0.2401,
+                                                  ammonia=0.0286,
+                                                  methane=0.0675, 
+                                                  argon=0.0139))
+inlet_bed1 <- inlet_total
+inlet_bed1@mdot <- inlet_bed1@mdot*(1-0.31395)
+quench_bed2 <- inlet_total
+quench_bed2@mdot <- quench_bed2@mdot*0.34
+out_bed2 <- recalculate.stream(inlet_total, 0.25, TRUE)
+out_bed2@conditions[["temperature"]] <- 445
+out_bed2@conditions[["pressure"]] <- inlet_total@conditions[["pressure"]]
 debug(converter)
 ammconverter <- converter(b1 <- new("Bed", reaction1, catalyst1, 4.75),
                        b2 <- new("Bed", reaction1, catalyst1, 7.2),
@@ -115,3 +127,14 @@ ammconverter <- converter(b1 <- new("Bed", reaction1, catalyst1, 4.75),
                                     n.tube = 740, l.tube = 8.16, baff.spacing = 0.664, pitch = 0.03969, lambda = 43))
 debug(ammconverter)
 ammconverter(inlet_bed1, list(NULL, quench_bed2))
+microbenchmark::microbenchmark(ammconverter(inlet_bed1, list(NULL, quench_bed2)), times = 10)
+#with real bed volumes
+ammconverter <- converter(b1 <- new("Bed", reaction1, catalyst1, 15.97),
+                          b2 <- new("Bed", reaction1, catalyst1, 45.97),
+                          b3 <- new("Bed", reaction1, catalyst1, 74.03),
+                          interchanger(d.sh.inner = 1.133, d.sh.outer = 1.692,
+                                       dt.inner = 0.03175, dt.outer = 0.03175+2*0.00165, 
+                                       n.tube = 740, l.tube = 8.16, baff.spacing = 0.664, 
+                                       pitch = 0.03969, lambda = 43))
+
+myres <- ammconverter(inlet_bed1, list(NULL, quench_bed2))

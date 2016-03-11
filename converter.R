@@ -37,7 +37,7 @@ converter <- function(bed1, bed2, bed3, interchanger){
             as.double(bedresult[[1]][nrow(bedresult[[1]]), "1"]), TRUE
         )
         temp_stream@conditions[["temperature"]] <-  as.double(bedresult[[1]][nrow(bedresult[[1]]), "2"])
-        temp_stream@conditions[["pressure"]] <- system_pressure
+        temp_stream@conditions[["pressure"]] <- unit_pressure
         if (is.null(bedodes[[2]]))
             bedodes[[2]] <- bed.ode.func(bed.db(beds[[2]]),temp_stream)
         else
@@ -60,15 +60,15 @@ converter <- function(bed1, bed2, bed3, interchanger){
             environment(bedodes[[1]])$inlet, as.double(bedresult[[1]][nrow(bedresult[[1]]), "1"]), TRUE
         )
         temp_stream@conditions[["temperature"]] <-  as.double(bedresult[[2]][nrow(bedresult[[2]]), "2"])
-        temp_stream@conditions[["pressure"]] <- system_pressure
+        temp_stream@conditions[["pressure"]] <- unit_pressure
         HE_temperature <<- interchanger(temp_stream@mdot,
                                         environment(bedodes[[1]])$inlet@mdot,
                                         temp_stream@conditions[["temperature"]],
-                                        environment(bedodes[[1]])$inlet@conditions[["temperature"]],
+                                        feed_temperature,
                                         unit_pressure)
         third_bed_inlet <<- temp_stream
         rm(temp_stream)
-        return(feed_temperature - as.double(HE_temperature[1, "2"]))
+        return(temperature_in - as.double(HE_temperature[nrow(HE_temperature), "2"]))
     }
     
     return(function(inlet, quench){
@@ -78,7 +78,7 @@ converter <- function(bed1, bed2, bed3, interchanger){
         feed_temperature <<- as.double(inlet@conditions[["temperature"]])
         quench <<- quench
         #solve for first two beds and interchanger
-        result <- uniroot(zerof, c(250, 420))$root
+        result <- uniroot(zerof, c(230, 500))$root
         #get stream entering into 3rd bed
         
         #create bed db for 3rd bed

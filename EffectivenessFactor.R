@@ -1,18 +1,21 @@
 int_weights <- c(0.04567809, 0.12589839, 0.13397916, 1 / 36 )
 
-pr.effectiveness.factor <- function(surface, init.guess,
+pr.effectiveness.factor <- function(surface, 
                                     t, p, C_total,
                                     preExp, Ea, alpha,
-                                    intrPorosity, voidage, rParticle){
-    require(rootSolve)
+                                    intrPorosity, voidage, rParticle,
+                                    init.guess = NULL){
+    require(nleqslv)
     #set orth coll function
+    if (is.null(init.guess))
+        init.guess <- unname(c(sapply(surface, function(x) rep(x, times = 3))))
     orthcoll <- set.ocf(surface, 
                         t, p, C_total,
                         preExp, Ea, alpha,
                         intrPorosity, voidage, rParticle)
     #solve for internal collocation points
-    conc <- multiroot(orthcoll, init.guess)
-    conc <- matrix(conc$root, ncol = 3, 
+    conc <- nleqslv(init.guess, orthcoll)
+    conc <- matrix(conc$x, ncol = 3, 
                    dimnames = list(NULL, c("hydrogen", "nitrogen", "ammonia")))
     #find kinetic parameters at the current conditions
     kin.const <- pr.kinetic.constant(preExp, Ea, t)
@@ -28,6 +31,7 @@ pr.effectiveness.factor <- function(surface, init.guess,
     colnames(fgc) <- c("hydrogen", "nitrogen","ammonia")
     #reation rates at collocation points
     rates <- apply(fgc, 1, function(fgc) pr.reaction.rate.NH3(kin.const, eq.const, fgc, alpha))
+    names(rates) <- NULL
     #return effectiveness factor
     return(3*(sum(int_weights*rates))/rates[length(rates)])
 }

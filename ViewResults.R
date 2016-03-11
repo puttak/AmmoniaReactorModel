@@ -1,7 +1,7 @@
-bed.summary <- function(deSolveMatrix, bed){
-    pressure <- bed@inlet@conditions[["pressure"]]
+bed.summary <- function(deSolveMatrix, bed, stream){
+    pressure <- stream@conditions[["pressure"]]
     get.streams <- function(x){
-        stream <- recalculate.stream(bed@inlet, x[[2]], return.stream = TRUE)
+        stream <- recalculate.stream(stream, x[[2]], return.stream = TRUE)
         stream@conditions <- c(temperature=x[[3]], pressure=pressure)
         return(stream)
     }
